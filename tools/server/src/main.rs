@@ -212,14 +212,21 @@ async fn main() -> Fallible<()> {
     let socket_addr = format!("{}:{}", opt.address, opt.port).parse()?;
     info!(%socket_addr);
 
+    let apollo_content_type = Arc::new(hyper::header::HeaderValue::from_str(
+        "application/json; charset=utf-8",
+    )?);
+
     hyper::Server::bind(&socket_addr)
         .serve(hyper::service::make_service_fn(move |_| {
             let base_url = opt.base_url.clone();
+            let apollo_content_type = apollo_content_type.clone();
             async {
-                Ok::<_, hyper::Error>(hyper::service::service_fn(move |req| {
+                Ok::<_, hyper::Error>(hyper::service::service_fn(move |mut req| {
                     let base_url = base_url.clone();
+                    let apollo_content_type = apollo_content_type.clone();
                     async {
                         info!(?req, uri = ?req.uri());
+                        let apollo_content_type = apollo_content_type;
                         let context = Arc::new(Context {
                             base_url,
                             image_count: 500,
@@ -268,6 +275,14 @@ async fn main() -> Fallible<()> {
                                 )
                             }
                             (&Method::POST, "/graphql") => {
+                                if req.headers().get(hyper::header::CONTENT_TYPE)
+                                    == Some(&apollo_content_type)
+                                {
+                                    req.headers_mut().insert(
+                                        hyper::header::CONTENT_TYPE,
+                                        "application/json".parse().unwrap(),
+                                    );
+                                }
                                 juniper_hyper::graphql(root_node, context, req).await.map(
                                     |mut data| {
                                         data.headers_mut().append(

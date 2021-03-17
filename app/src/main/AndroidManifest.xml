@@ -6,8 +6,9 @@
     <application
         android:allowBackup="false"
         android:label="Photo Gallery"
+        android:name=".App"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.Material">
+        android:theme="@style/Theme.AppCompat">
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

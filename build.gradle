@@ -12,6 +12,7 @@ buildscript {
 }
 
 plugins {
+    id 'com.apollographql.apollo' version '2.5.4' apply false
     id 'com.google.protobuf' version '0.8.15' apply false
     id 'org.jetbrains.kotlin.android' version '1.4.31' apply false
     id 'org.jetbrains.kotlin.plugin.serialization' version '1.4.31' apply false
@@ -31,6 +32,15 @@ allprojects {
         jcenter {
             content {
                 includeGroup('org.jetbrains.trove4j')
+            }
+        }
+
+        maven {
+            name = 'AndroidLogger'
+            url 'https://maven.pkg.github.com/sukawasatoru/android-logger'
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
             }
         }
     }

@@ -1,4 +1,7 @@
 include ':app'
+include ':data:graphql'
+include ':data:repository'
+include ':model'
 
 def isCi = System.getenv().containsKey("CI")
 def hasCacheServer = hasProperty('cacheServerUri')

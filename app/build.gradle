@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
+    id 'dagger.hilt.android.plugin'
     id 'kotlin-android'
+    id 'kotlin-kapt'
 }
 
 android {
@@ -31,5 +33,14 @@ android {
 }
 
 dependencies {
+    implementation project(':data:graphql')
+    implementation project(':data:repository')
+    implementation Depends.androidx.appcompat
+    implementation Depends.androidx.lifecycleRuntime
+    implementation Depends.kotlin.coroutines
     implementation Depends.kotlin.stdlib
+    implementation Depends.kotlinResult
+    implementation Depends.google.hilt
+    implementation Depends.tinyport.logger
+    kapt Depends.google.hiltCompiler
 }

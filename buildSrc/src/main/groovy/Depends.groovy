@@ -1,14 +1,17 @@
 class Depends {
     static final androidx = new AndroidX()
+    static final apollo = new Apollo()
     static final google = new Google()
     static final kotlin = new Kotlin()
     static final kotlinResult = 'com.michael-bull.kotlin-result:kotlin-result:1.1.9'
     static final okhttp = 'com.squareup.okhttp3:okhttp:4.9.0'
     static final test = new Test()
+    static final tinyport = new Tinyport()
 
     static class AndroidX {
         final activity = 'androidx.activity:activity-ktx:1.2.1'
         final annotation = 'androidx.annotation:annotation:1.1.0'
+        final appcompat = 'androidx.appcompat:appcompat:1.2.0'
         final constraint = 'androidx.constraintlayout:constraintlayout:2.0.4'
         final datastore = 'androidx.datastore:datastore-core:1.0.0-alpha08'
         final fragment = 'androidx.fragment:fragment-ktx:1.3.1'
@@ -24,6 +27,15 @@ class Depends {
         final roomCompiler = "androidx.room:room-compiler:$roomVersion"
         final roomKtx = "androidx.room:room-ktx:$roomVersion"
         final roomRuntime = "androidx.room:room-runtime:$roomVersion"
+    }
+
+    static class Apollo {
+        final version = '2.5.4'
+        final androidSupport = "com.apollographql.apollo:apollo-android-support:$version"
+        final api = "com.apollographql.apollo:apollo-api:$version"
+        final cacheSqlite = "com.apollographql.apollo:apollo-normalized-cache-sqlite:$version"
+        final coroutine = "com.apollographql.apollo:apollo-coroutines-support:$version"
+        final runtime = "com.apollographql.apollo:apollo-runtime:$version"
     }
 
     static class Google {
@@ -56,5 +68,9 @@ class Depends {
         final truthVersion = '1.1'
         final truth = "com.google.truth:truth:$truthVersion"
         final truthJava8 = "com.google.truth.extensions:truth-java8-extension:$truthVersion"
+    }
+
+    static class Tinyport {
+        final logger = 'jp.tinyport:logger:0.1.0'
     }
 }

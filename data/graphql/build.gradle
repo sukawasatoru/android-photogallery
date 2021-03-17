@@ -1,0 +1,24 @@
+plugins {
+    id 'com.android.library'
+    id 'com.apollographql.apollo'
+    id 'kotlin-android'
+}
+
+android {
+    buildFeatures {
+        buildConfig false
+        resValues false
+    }
+}
+
+apollo {
+    generateKotlinModels.set true
+}
+
+dependencies {
+    implementation project(':model')
+    implementation Depends.androidx.annotation
+    implementation Depends.apollo.coroutine
+    implementation Depends.apollo.runtime
+    implementation Depends.kotlinResult
+}

@@ -1,0 +1,15 @@
+query ImageMeta($first: Int!, $after: String) {
+  images(first: $first, after: $after) {
+    __typename
+    nodes {
+      __typename
+      url
+    }
+    pageInfo {
+      __typename
+      endCursor
+      hasNextPage
+    }
+    totalCount
+  }
+}

@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import jp.tinyport.photogallery.BuildConfig
 import jp.tinyport.photogallery.data.graphql.ImageServerDataSource
 import jp.tinyport.photogallery.data.graphql.ImageServerDataSourceImpl
 import jp.tinyport.photogallery.data.repository.ImageRepository
@@ -16,7 +17,7 @@ class AppModule {
     @Suppress("EXPERIMENTAL_API_USAGE")
     @Provides
     fun provideImageServerDataSource(): ImageServerDataSource {
-        return ImageServerDataSourceImpl()
+        return ImageServerDataSourceImpl(BuildConfig.API_ENDPOINT)
     }
 
     @Provides

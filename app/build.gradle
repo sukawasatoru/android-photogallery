@@ -11,6 +11,8 @@ android {
         versionCode 1
         versionName '0.1.0'
         signingConfig signingConfigs.debug
+
+        buildConfigField 'String', 'API_ENDPOINT', "\"${project.jpTinyportPhotogalleryApiEndpoint}\""
     }
 
     buildFeatures {

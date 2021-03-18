@@ -14,9 +14,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 
 @ExperimentalCoroutinesApi
-class ImageServerDataSourceImpl : ImageServerDataSource {
+class ImageServerDataSourceImpl(apiEndpoint: String) : ImageServerDataSource {
     private val apolloClient = ApolloClient.builder()
-            .serverUrl("http://192.168.10.189:38082/graphql")
+            .serverUrl(apiEndpoint)
             .build()
 
     @RequiresPermission(Manifest.permission.INTERNET)

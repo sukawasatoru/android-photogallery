@@ -324,7 +324,7 @@ fn image(name: &str) -> hyper::Response<hyper::Body> {
         .collect::<Vec<_>>();
     let mut buf = Vec::with_capacity(100 * 1024 * 1024);
     silicon::formatter::ImageFormatterBuilder::new()
-        .font(vec![("Ubuntu Mono", 48.0)])
+        .font(vec![("JetBrains Mono", 48.0), ("Ubuntu Mono", 48.0)])
         .line_number(false)
         .shadow_adder(silicon::utils::ShadowAdder::default())
         .build()

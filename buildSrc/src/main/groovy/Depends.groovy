@@ -17,8 +17,12 @@ class Depends {
         final fragment = 'androidx.fragment:fragment-ktx:1.3.1'
         final leanback = 'androidx.leanback:leanback:1.0.0'
         final lifecycleVersion = '2.3.0'
+        final lifecycleCompiler = "androidx.lifecycle:lifecycle-compiler:$lifecycleVersion"
         final lifecycleLiveData = "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
         final lifecycleRuntime = "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion"
+        final lifecycleViewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
+        final lifecycleViewModelSavedState = "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycleVersion"
+        final lifecycleService = "androidx.lifecycle:lifecycle-service:$lifecycleVersion"
         final navigationVersion = '2.3.4'
         final navigationFragment = "androidx.navigation:navigation-fragment-ktx:$navigationVersion"
         final navigationUi = "androidx.navigation:navigation-ui-ktx:$navigationVersion"

@@ -1,13 +1,18 @@
 package jp.tinyport.photogallery
 
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import dagger.hilt.android.AndroidEntryPoint
 import jp.tinyport.photogallery.data.repository.ImageRepository
-import kotlinx.coroutines.Dispatchers
+import jp.tinyport.photogallery.model.MyImage
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -16,22 +21,41 @@ class MainActivity : AppCompatActivity() {
     @Inject
     lateinit var repo: ImageRepository
 
+    private val vm: MyVm by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         log.info("[MainActivity] onCreate")
 
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            val images = when (val data = repo.retrieveImage(10, null)) {
-                is Ok -> {
-                    data.value
+        if (!vm.init) {
+            vm.init = true
+            vm.viewModelScope.launch {
+                val images = mutableListOf<MyImage>()
+                var after: String? = null
+                while (true) {
+                    val (retImages, cursor) = when (val data = repo.retrieveImage(1000, after)) {
+                        is Ok -> {
+                            data.value
+                        }
+                        is Err -> {
+                            log.warn("failed to retrieve image: %s", data.error)
+                            return@launch
+                        }
+                    }
+                    log.info("succeeded")
+                    images.addAll(retImages)
+                    if (cursor == null) {
+                        break
+                    }
+                    after = cursor
                 }
-                is Err -> {
-                    log.warn("failed to retrieve image: %s", data.error)
-                    return@launch
-                }
+                vm.images.emit(images)
             }
-            log.info("succeeded: %s", images)
+        }
+
+        vm.images.asLiveData().observe(this) {
+            log.info("[MainActivity] onImages len: %s", it.size)
         }
     }
 
@@ -40,4 +64,31 @@ class MainActivity : AppCompatActivity() {
 
         super.onDestroy()
     }
+
+    override fun onResume() {
+        log.info("[MainActivity] onResume")
+
+        super.onResume()
+    }
+
+    override fun onPause() {
+        log.info("[MainActivity] onPause")
+
+        super.onPause()
+    }
+
+    override fun onRestart() {
+        log.info("[MainActivity] onRestart")
+
+        super.onRestart()
+    }
 }
+
+internal class MyVm : ViewModel() {
+    var init = false
+    val images = MutableSharedFlow<List<MyImage>>(
+            replay = 1,
+            onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+}
+

@@ -229,7 +229,7 @@ async fn main() -> Fallible<()> {
                         let apollo_content_type = apollo_content_type;
                         let context = Arc::new(Context {
                             base_url,
-                            image_count: 500,
+                            image_count: 100_000,
                         });
 
                         let root_node = Arc::new(juniper::RootNode::new(

@@ -37,8 +37,12 @@ android {
 dependencies {
     implementation project(':data:graphql')
     implementation project(':data:repository')
+    implementation project(':model')
+    implementation Depends.androidx.activity
     implementation Depends.androidx.appcompat
-    implementation Depends.androidx.lifecycleRuntime
+    implementation Depends.androidx.constraint
+    implementation Depends.androidx.lifecycleViewModel
+    implementation Depends.androidx.lifecycleLiveData
     implementation Depends.kotlin.coroutines
     implementation Depends.kotlin.stdlib
     implementation Depends.kotlinResult

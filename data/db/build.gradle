@@ -1,0 +1,31 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+}
+
+android {
+    defaultConfig {
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += [
+                    'room.expandProjection': true.toString(),
+                    'room.incremental': true.toString(),
+                    'room.schemaLocation': "$projectDir/schemas".toString(),
+                ]
+            }
+        }
+    }
+
+    buildFeatures {
+        buildConfig false
+        resValues false
+    }
+}
+
+dependencies {
+    implementation project(':model')
+    implementation Depends.kotlinResult
+    implementation Depends.androidx.roomKtx
+    kapt Depends.androidx.roomCompiler
+}

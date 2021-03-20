@@ -11,8 +11,6 @@ android {
         versionCode 1
         versionName '0.1.0'
         signingConfig signingConfigs.debug
-
-        buildConfigField 'String', 'API_ENDPOINT', "\"${project.jpTinyportPhotogalleryApiEndpoint}\""
     }
 
     buildFeatures {
@@ -35,7 +33,6 @@ android {
 }
 
 dependencies {
-    implementation project(':data:graphql')
     implementation project(':data:repository')
     implementation project(':model')
     implementation Depends.androidx.activity

@@ -8,11 +8,16 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
+import com.github.michaelbull.result.getOrElse
+import com.github.michaelbull.result.map
 import dagger.hilt.android.AndroidEntryPoint
 import jp.tinyport.photogallery.data.repository.ImageRepository
 import jp.tinyport.photogallery.model.MyImage
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,34 +33,37 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        if (!vm.init) {
-            vm.init = true
-            vm.viewModelScope.launch {
-                val images = mutableListOf<MyImage>()
-                var after: String? = null
-                while (true) {
-                    val (retImages, cursor) = when (val data = repo.retrieveImage(1000, after)) {
-                        is Ok -> {
-                            data.value
-                        }
-                        is Err -> {
-                            log.warn("failed to retrieve image: %s", data.error)
-                            return@launch
-                        }
-                    }
-                    log.info("succeeded")
-                    images.addAll(retImages)
-                    if (cursor == null) {
-                        break
-                    }
-                    after = cursor
-                }
-                vm.images.emit(images)
-            }
-        }
-
         vm.images.asLiveData().observe(this) {
             log.info("[MainActivity] onImages len: %s", it.size)
+        }
+
+        if (vm.init) {
+            return
+        }
+
+        vm.init = true
+
+        vm.viewModelScope.launch {
+            repo.retrieveImageAndUpdate()
+                    .onCompletion {
+                        log.info("onCompletion")
+                    }
+                    .onStart {
+                        log.info("onStart")
+                    }
+                    .collect {
+                        log.info("collect size: %s",
+                                it.map { it.size.toString() }.getOrElse { "(null)" },
+                        )
+                        when (it) {
+                            is Ok -> {
+                                vm.images.emit(it.value)
+                            }
+                            is Err -> {
+                                log.warn(it.error)
+                            }
+                        }
+                    }
         }
     }
 

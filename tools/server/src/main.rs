@@ -165,6 +165,10 @@ struct Image {
 
 #[graphql_object(Context = Context)]
 impl Image {
+    fn id(&self) -> String {
+        format!("tentative-id-{}", self.id)
+    }
+
     fn url(&self, context: &Context) -> Url {
         context
             .base_url

@@ -4,25 +4,23 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import jp.tinyport.photogallery.BuildConfig
-import jp.tinyport.photogallery.data.graphql.ImageServerDataSource
-import jp.tinyport.photogallery.data.graphql.ImageServerDataSourceImpl
+import jp.tinyport.logger.Logger
+import jp.tinyport.photogallery.data.repository.DefaultImageRepository
 import jp.tinyport.photogallery.data.repository.ImageRepository
-import kotlinx.coroutines.Dispatchers
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-class AppModule {
-    @Suppress("EXPERIMENTAL_API_USAGE")
+object AppModule {
     @Provides
-    fun provideImageServerDataSource(): ImageServerDataSource {
-        return ImageServerDataSourceImpl(BuildConfig.API_ENDPOINT)
+    @Singleton
+    fun provideImageRepository(repo: DefaultImageRepository): ImageRepository {
+        return repo
     }
 
     @Provides
     @Singleton
-    fun provideImageRepository(dataSource: ImageServerDataSource): ImageRepository {
-        return ImageRepository(Dispatchers.IO, dataSource)
+    fun provideLogger(): Logger {
+        return Logger()
     }
 }

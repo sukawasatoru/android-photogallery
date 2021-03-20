@@ -12,6 +12,9 @@ android {
 }
 
 apollo {
+    customTypeMapping = [
+        'Url': 'kotlin.String',
+    ]
     generateKotlinModels.set true
 }
 

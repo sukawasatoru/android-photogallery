@@ -1,4 +1,5 @@
 include ':app'
+include ':data:db'
 include ':data:graphql'
 include ':data:repository'
 include ':model'

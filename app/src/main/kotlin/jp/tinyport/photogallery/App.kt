@@ -6,15 +6,22 @@ import jp.tinyport.logger.ConsoleLogDestination
 import jp.tinyport.logger.Logger
 import java.io.OutputStream
 import java.io.PrintStream
+import javax.inject.Inject
+import kotlin.properties.Delegates
 
-val log = Logger()
+var log by Delegates.notNull<Logger>()
 
 @HiltAndroidApp
 class App : Application() {
+    @Inject
+    lateinit var logger: Logger
+
     override fun onCreate() {
         super.onCreate()
 
         val isReleaseBuild = !BuildConfig.DEBUG
+
+        log = logger
         log.addDestination(ConsoleLogDestination("Photo").apply {
             if (isReleaseBuild) {
                 minLevel = Logger.Level.INFO

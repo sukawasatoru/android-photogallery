@@ -1,18 +1,30 @@
 plugins {
     id 'com.android.library'
     id 'kotlin-android'
+    id 'kotlin-kapt'
 }
 
 android {
+    defaultConfig {
+        buildConfigField 'String', 'API_ENDPOINT', "\"${project.jpTinyportPhotogalleryApiEndpoint}\""
+    }
+
     buildFeatures {
-        buildConfig false
         resValues false
     }
 }
 
 dependencies {
-    implementation project(':data:graphql')
     implementation project(':model')
+    implementation Depends.androidx.roomKtx
+    implementation Depends.google.hilt
     implementation Depends.kotlinResult
     implementation Depends.kotlin.coroutines
+    implementation Depends.tinyport.logger
+
+    // api for hilt.
+    api project(':data:db')
+    api project(':data:graphql')
+
+    kapt Depends.google.hiltCompiler
 }

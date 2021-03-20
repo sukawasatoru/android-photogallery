@@ -20,6 +20,10 @@ struct Opt {
     #[structopt(short, long, parse(try_from_str))]
     base_url: Url,
 
+    /// Font name
+    #[structopt(short, long)]
+    font: String,
+
     /// Port number
     #[structopt(short, long, default_value = "38082")]
     port: u16,
@@ -235,13 +239,16 @@ async fn main() -> Fallible<()> {
         .serve(hyper::service::make_service_fn(move |_| {
             let base_url = opt.base_url.clone();
             let apollo_content_type = apollo_content_type.clone();
+            let font_name = Arc::new(opt.font.clone());
             async {
                 Ok::<_, hyper::Error>(hyper::service::service_fn(move |mut req| {
                     let base_url = base_url.clone();
                     let apollo_content_type = apollo_content_type.clone();
+                    let font_name = font_name.clone();
                     async {
                         info!(?req, uri = ?req.uri());
                         let apollo_content_type = apollo_content_type;
+                        let font_name = font_name;
                         let context = Arc::new(Context {
                             base_url,
                             image_count: 100_000,
@@ -256,7 +263,7 @@ async fn main() -> Fallible<()> {
                         let req_uri = req.uri().path().split('/').collect::<Vec<_>>();
                         if req.method() == &Method::GET && req_uri.get(1) == Some(&"image") {
                             let image_name = req_uri.last().unwrap_or(&"(none)");
-                            return Ok(image(image_name));
+                            return Ok(image(image_name, &font_name));
                         }
 
                         match (req.method(), req.uri().path()) {
@@ -329,7 +336,7 @@ async fn main() -> Fallible<()> {
     Ok(())
 }
 
-fn image(name: &str) -> hyper::Response<hyper::Body> {
+fn image(name: &str, font: &str) -> hyper::Response<hyper::Body> {
     let (ps, ts) = silicon::utils::init_syntect();
     let syntax = ps.find_syntax_by_extension("txt").unwrap();
     let theme = &ts.themes["Dracula"];
@@ -339,7 +346,7 @@ fn image(name: &str) -> hyper::Response<hyper::Body> {
         .collect::<Vec<_>>();
     let mut buf = Vec::with_capacity(100 * 1024 * 1024);
     silicon::formatter::ImageFormatterBuilder::new()
-        .font(vec![("JetBrains Mono", 48.0), ("Ubuntu Mono", 48.0)])
+        .font(vec![(font, 48.0)])
         .line_number(false)
         .shadow_adder(silicon::utils::ShadowAdder::default())
         .build()

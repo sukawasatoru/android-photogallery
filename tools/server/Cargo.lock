@@ -1102,6 +1102,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7fb9b38af92608140b86b693604b9ffcc5824240a484d1ecd4795bacb2fe88f3"
 
 [[package]]
+name = "lipsum"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "27bdfcb80998b71ab4141f3725b990c923bccebbba596d053a66c083c04f8b9c"
+dependencies = [
+ "rand 0.7.3",
+ "rand_chacha 0.2.2",
+]
+
+[[package]]
 name = "log"
 version = "0.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1917,6 +1927,7 @@ dependencies = [
  "image",
  "juniper",
  "juniper_hyper",
+ "lipsum",
  "pasteboard",
  "serde_json",
  "silicon",

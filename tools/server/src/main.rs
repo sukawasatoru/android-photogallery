@@ -121,7 +121,10 @@ impl ImagesConnection {
         };
 
         (start..=range_max(self.first, self.after, context.image_count))
-            .map(|id| Image { id })
+            .map(|id| Image {
+                id,
+                description: lipsum::lipsum_words(100),
+            })
             .collect()
     }
 
@@ -148,12 +151,16 @@ impl ImagesEdge {
     }
 
     fn node(&self) -> Image {
-        Image { id: self.id }
+        Image {
+            id: self.id,
+            description: lipsum::lipsum_words(100),
+        }
     }
 }
 
 struct Image {
     id: i32,
+    description: String,
 }
 
 #[graphql_object(Context = Context)]
@@ -163,6 +170,10 @@ impl Image {
             .base_url
             .join(&format!("image/image-{}.png", self.id))
             .unwrap()
+    }
+
+    fn description(&self) -> &str {
+        &self.description
     }
 }
 

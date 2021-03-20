@@ -4,6 +4,7 @@ query ImageMeta($first: Int!, $after: String) {
     nodes {
       __typename
       url
+      description
     }
     pageInfo {
       __typename

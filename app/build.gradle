@@ -40,10 +40,13 @@ dependencies {
     implementation Depends.androidx.constraint
     implementation Depends.androidx.lifecycleViewModel
     implementation Depends.androidx.lifecycleLiveData
+    implementation Depends.androidx.recyclerView
+    implementation Depends.glide.glide
     implementation Depends.kotlin.coroutines
     implementation Depends.kotlin.stdlib
     implementation Depends.kotlinResult
     implementation Depends.google.hilt
     implementation Depends.tinyport.logger
+    kapt Depends.glide.compiler
     kapt Depends.google.hiltCompiler
 }

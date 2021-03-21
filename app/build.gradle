@@ -40,6 +40,7 @@ dependencies {
     implementation Depends.androidx.constraint
     implementation Depends.androidx.lifecycleViewModel
     implementation Depends.androidx.lifecycleLiveData
+    implementation Depends.androidx.pagingRuntime
     implementation Depends.androidx.recyclerView
     implementation Depends.glide.glide
     implementation Depends.kotlin.coroutines

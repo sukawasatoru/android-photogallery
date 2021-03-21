@@ -1,5 +1,6 @@
 package jp.tinyport.photogallery
 
+import android.content.ComponentCallbacks2
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -9,6 +10,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingDataAdapter
+import androidx.paging.PagingSource
+import androidx.paging.PagingState
+import androidx.paging.cachedIn
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -17,6 +24,7 @@ import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.getOrElse
 import com.github.michaelbull.result.map
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.tinyport.photogallery.data.repository.ImageRepository
 import jp.tinyport.photogallery.databinding.ListItemBinding
 import jp.tinyport.photogallery.databinding.MainActivityBinding
@@ -24,16 +32,17 @@ import jp.tinyport.photogallery.model.MyImage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.RuntimeException
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -42,15 +51,49 @@ class MainActivity : AppCompatActivity() {
     lateinit var repo: ImageRepository
 
     private val vm: MyVm by viewModels()
+    private val hugeVm: HugeVm by viewModels()
+
+    private lateinit var binding: MainActivityBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         log.info("[MainActivity] onCreate")
 
         super.onCreate(savedInstanceState)
 
-        val binding = MainActivityBinding.inflate(layoutInflater)
+        binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        useHugeAdapter()
+    }
+
+    override fun onDestroy() {
+        log.info("[MainActivity] onDestroy")
+
+        super.onDestroy()
+    }
+
+    override fun onResume() {
+        log.info("[MainActivity] onResume")
+
+        super.onResume()
+    }
+
+    override fun onPause() {
+        log.info("[MainActivity] onPause")
+
+        super.onPause()
+    }
+
+    override fun onRestart() {
+        log.info("[MainActivity] onRestart")
+
+        super.onRestart()
+    }
+
+    /**
+     * ver. 1d0c559.
+     */
+    private fun useMyAdapter() {
         val adapter = MyAdapter()
         binding.list.adapter = adapter
 
@@ -90,28 +133,43 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        log.info("[MainActivity] onDestroy")
+    /**
+     * Paging ver.
+     */
+    private fun useHugeAdapter() {
+        val adapter = HugeAdapter()
+        binding.list.adapter = adapter
 
-        super.onDestroy()
+        lifecycleScope.launch {
+            hugeVm.pagerFlow.collectLatest { adapter.submitData(it) }
+        }
+
+        lifecycleScope.launch {
+            adapter.loadStateFlow
+                    .collectLatest {
+                        log.info("[MainActivity] loadStateFlow: %s", it)
+                    }
+        }
+
+        // TODO: https://developer.android.com/topic/libraries/architecture/paging/v3-paged-data?hl=ja#load-state-adapter
+        // adapter.withLoadStateHeader()
     }
 
-    override fun onResume() {
-        log.info("[MainActivity] onResume")
+    override fun onTrimMemory(level: Int) {
+        val levelString = when(level) {
+            TRIM_MEMORY_COMPLETE -> "TRIM_MEMORY_COMPLETE"
+            TRIM_MEMORY_MODERATE -> "TRIM_MEMORY_MODERATE"
+            TRIM_MEMORY_BACKGROUND -> "TRIM_MEMORY_BACKGROUND"
+            TRIM_MEMORY_UI_HIDDEN -> "TRIM_MEMORY_UI_HIDDEN"
+            TRIM_MEMORY_RUNNING_CRITICAL -> "TRIM_MEMORY_RUNNING_CRITICAL"
+            TRIM_MEMORY_RUNNING_LOW -> "TRIM_MEMORY_RUNNING_LOW"
+            TRIM_MEMORY_RUNNING_MODERATE -> "TRIM_MEMORY_RUNNING_MODERATE"
+            else -> throw RuntimeException("unreachable")
+        }
 
-        super.onResume()
-    }
+        log.info("[MainActivity] onTrimMemory: %s", levelString)
 
-    override fun onPause() {
-        log.info("[MainActivity] onPause")
-
-        super.onPause()
-    }
-
-    override fun onRestart() {
-        log.info("[MainActivity] onRestart")
-
-        super.onRestart()
+        super.onTrimMemory(level)
     }
 }
 
@@ -199,6 +257,70 @@ internal class MyAdapter : RecyclerView.Adapter<MyViewHolder>() {
                 list = newList
                 diff.dispatchUpdatesTo(this@MyAdapter)
             }
+        }
+    }
+}
+
+@HiltViewModel
+internal class HugeVm @Inject constructor(repo: ImageRepository) : ViewModel() {
+    val pagerFlow = Pager(PagingConfig(1)) { MyPagingSource(repo) }
+            .flow
+            .cachedIn(viewModelScope)
+}
+
+internal object HugeDiffCallback : DiffUtil.ItemCallback<MyImage>() {
+    override fun areItemsTheSame(oldItem: MyImage, newItem: MyImage): Boolean {
+        return oldItem.id == newItem.id
+    }
+
+    override fun areContentsTheSame(oldItem: MyImage, newItem: MyImage): Boolean {
+        return oldItem == newItem
+    }
+}
+
+internal class HugeAdapter : PagingDataAdapter<MyImage, MyViewHolder>(HugeDiffCallback) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
+        return MyViewHolder(ListItemBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false))
+    }
+
+    override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        log.info("[MainActivity] onBindViewHolder pos: %s", position)
+        getItem(position)?.let {
+            Glide.with(holder.binding.image)
+                    .load(it.url)
+                    .into(holder.binding.image)
+        }
+    }
+
+    override fun onViewRecycled(holder: MyViewHolder) {
+        super.onViewRecycled(holder)
+
+        Glide.with(holder.binding.image).clear(holder.binding.image)
+    }
+}
+
+internal class MyPagingSource(private val repo: ImageRepository) : PagingSource<String, MyImage>() {
+    override suspend fun load(params: LoadParams<String>): LoadResult<String, MyImage> {
+        return when (val data = repo.retrieveImageForPaging(params.key)) {
+            is Ok -> LoadResult.Page(data.value.first, null, data.value.second)
+            is Err -> LoadResult.Error(Exception(data.error))
+        }
+    }
+
+    override fun getRefreshKey(state: PagingState<String, MyImage>): String? {
+        log.info("[MainActivity] getRefreshKey anchorPosition: %s", state.anchorPosition)
+
+        return state.anchorPosition?.let { anchorPosition ->
+            val closest = state.closestPageToPosition(anchorPosition)
+            // TODO: nextKey +1 ?
+            // https://developer.android.com/topic/libraries/architecture/paging/v3-paged-data#pagingsource
+            log.info(
+                    "[MainActivity] getRefreshKey prevKey: %s, nextKey: %s",
+                    closest?.prevKey,
+                    closest?.nextKey,
+            )
+            closest?.prevKey ?: closest?.nextKey
         }
     }
 }

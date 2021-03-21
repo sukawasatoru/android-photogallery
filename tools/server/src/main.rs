@@ -1,6 +1,7 @@
 use anyhow::Result as Fallible;
 use hyper::Method;
 use juniper::{graphql_object, graphql_value, FieldError, FieldResult};
+use std::convert::TryInto;
 use std::sync::Arc;
 use structopt::StructOpt;
 use tracing::{info, warn};
@@ -23,6 +24,10 @@ struct Opt {
     /// Font name
     #[structopt(short, long)]
     font: String,
+
+    /// Total photo number
+    #[structopt(short, long)]
+    photo_num: u32,
 
     /// Port number
     #[structopt(short, long, default_value = "38082")]
@@ -231,40 +236,51 @@ async fn main() -> Fallible<()> {
     let socket_addr = format!("{}:{}", opt.address, opt.port).parse()?;
     info!(%socket_addr);
 
+    struct BaseContext {
+        base_url: Url,
+        image_count: i32,
+    }
+
     let apollo_content_type = Arc::new(hyper::header::HeaderValue::from_str(
         "application/json; charset=utf-8",
     )?);
+    let base_context = Arc::new(BaseContext {
+        base_url: opt.base_url,
+        image_count: opt.photo_num.try_into()?,
+    });
+    let font_name = Arc::new(opt.font);
+    let root_node = Arc::new(juniper::RootNode::new(
+        Query,
+        juniper::EmptyMutation::new(),
+        juniper::EmptySubscription::new(),
+    ));
 
     hyper::Server::bind(&socket_addr)
-        .serve(hyper::service::make_service_fn(move |_| {
-            let base_url = opt.base_url.clone();
+        .serve(hyper::service::make_service_fn(|_| {
             let apollo_content_type = apollo_content_type.clone();
-            let font_name = Arc::new(opt.font.clone());
-            async {
+            let base_context = base_context.clone();
+            let font_name = font_name.clone();
+            let root_node = root_node.clone();
+            async move {
                 Ok::<_, hyper::Error>(hyper::service::service_fn(move |mut req| {
-                    let base_url = base_url.clone();
                     let apollo_content_type = apollo_content_type.clone();
+                    let base_context = base_context.clone();
                     let font_name = font_name.clone();
-                    async {
-                        info!(?req, uri = ?req.uri());
-                        let apollo_content_type = apollo_content_type;
-                        let font_name = font_name;
-                        let context = Arc::new(Context {
-                            base_url,
-                            image_count: 100_000,
-                        });
+                    let root_node = root_node.clone();
 
-                        let root_node = Arc::new(juniper::RootNode::new(
-                            Query,
-                            juniper::EmptyMutation::new(),
-                            juniper::EmptySubscription::new(),
-                        ));
+                    async move {
+                        info!(?req, uri = ?req.uri());
 
                         let req_uri = req.uri().path().split('/').collect::<Vec<_>>();
                         if req.method() == &Method::GET && req_uri.get(1) == Some(&"image") {
                             let image_name = req_uri.last().unwrap_or(&"(none)");
                             return Ok(image(image_name, &font_name));
                         }
+
+                        let context = Arc::new(Context {
+                            base_url: base_context.base_url.clone(),
+                            image_count: base_context.image_count,
+                        });
 
                         match (req.method(), req.uri().path()) {
                             (&Method::GET, "/graphiql") => {

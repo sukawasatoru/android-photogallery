@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.UUID
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -135,7 +136,7 @@ class MainActivity : AppCompatActivity() {
      * Paging ver.
      */
     private fun usePagingV3() {
-        val diffCallback = object: DiffUtil.ItemCallback<MyImage>() {
+        val diffCallback = object : DiffUtil.ItemCallback<MyImage>() {
             override fun areItemsTheSame(oldItem: MyImage, newItem: MyImage): Boolean {
                 return oldItem.id == newItem.id
             }
@@ -145,15 +146,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val adapter = object: PagingDataAdapter<MyImage, MyViewHolder>(diffCallback) {
+        val adapter = object : PagingDataAdapter<MyImage, MyViewHolder>(diffCallback) {
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
                 return MyViewHolder(ListItemBinding.inflate(
                         LayoutInflater.from(parent.context), parent, false))
             }
 
             override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-                log.info("[MainActivity] onBindViewHolder pos: %s", position)
-                getItem(position)?.let {
+                val item = getItem(position)
+                log.info("[MainActivity] onBindViewHolder pos: %s, item: %s",
+                        position, item?.url)
+                item?.let {
                     Glide.with(holder.binding.image)
                             .load(it.url)
                             .into(holder.binding.image)
@@ -300,9 +303,32 @@ internal class MyAdapter : RecyclerView.Adapter<MyViewHolder>() {
 internal class HugeVm @Inject constructor(repo: ImageRepository) : ViewModel() {
     val pagerFlow = Pager(PagingConfig(pageSize = 1, maxSize = 3)) {
         object : PagingSource<String, MyImage>() {
+            val firstKey = UUID.randomUUID().toString()
+            val keys = mutableSetOf(firstKey)
+
             override suspend fun load(params: LoadParams<String>): LoadResult<String, MyImage> {
-                return when (val data = repo.retrieveImageForPaging(params.key)) {
-                    is Ok -> LoadResult.Page(data.value.first, null, data.value.second)
+                // for load between 0 and "after" index.
+                val key = if (params.key == firstKey) {
+                    null
+                } else {
+                    params.key
+                }
+                return when (val data = repo.retrieveImageForPaging(key)) {
+                    is Ok -> {
+                        data.value.second?.let {
+                            keys.add(it)
+                        }
+                        var prevKey: String? = null
+                        for ((index, entry) in keys.withIndex()) {
+                            if (entry == key) {
+                                prevKey = keys.elementAtOrNull(index - 1)
+                                break
+                            }
+                        }
+                        log.info("[MainActivity] load prevKey: %s, key: %s, nextKey: %s",
+                                prevKey, key, data.value.second)
+                        LoadResult.Page(data.value.first, prevKey, data.value.second)
+                    }
                     is Err -> LoadResult.Error(Exception(data.error))
                 }
             }

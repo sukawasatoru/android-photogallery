@@ -190,7 +190,9 @@ internal class MyAdapter : RecyclerView.Adapter<MyViewHolder>() {
     private val useDiffUtil = true
 
     init {
-        setHasStableIds(true)
+        if (!useDiffUtil) {
+            setHasStableIds(true)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
@@ -215,7 +217,11 @@ internal class MyAdapter : RecyclerView.Adapter<MyViewHolder>() {
     }
 
     override fun getItemId(position: Int): Long {
-        return list[position].id.hashCode().toLong()
+        return if (useDiffUtil) {
+            RecyclerView.NO_ID
+        } else {
+            list[position].id.hashCode().toLong()
+        }
     }
 
     fun update(scope: CoroutineScope, newList: List<MyImage>) {

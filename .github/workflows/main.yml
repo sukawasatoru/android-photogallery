@@ -14,7 +14,7 @@ jobs:
       - name: Build
         env:
           GRADLE_OPTS: -Xmx4g
-          USER_NAME: ${{ github.actor }}
+          USERNAME: ${{ github.actor }}
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ./gradlew --info --stacktrace -PjpTinyportPhotogalleryApiEndpoint=http://example.com/graphql build

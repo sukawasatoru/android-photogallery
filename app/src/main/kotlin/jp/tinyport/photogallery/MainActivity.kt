@@ -301,19 +301,25 @@ internal class MyAdapter : RecyclerView.Adapter<MyViewHolder>() {
 
 @HiltViewModel
 internal class HugeVm @Inject constructor(repo: ImageRepository) : ViewModel() {
-    val pagerFlow = Pager(PagingConfig(pageSize = 1, maxSize = 3)) {
+    val pagerFlow = Pager(PagingConfig(
+            pageSize = 1000,
+            initialLoadSize = 1000,
+            maxSize = 5000,
+    )) {
         object : PagingSource<String, MyImage>() {
             val firstKey = UUID.randomUUID().toString()
             val keys = mutableSetOf(firstKey)
 
             override suspend fun load(params: LoadParams<String>): LoadResult<String, MyImage> {
+                log.info("[MainActivity] load key: %s, loadSize: %s",
+                        params.key, params.loadSize)
                 // for load between 0 and "after" index.
                 val key = if (params.key == firstKey) {
                     null
                 } else {
                     params.key
                 }
-                return when (val data = repo.retrieveImageForPaging(key)) {
+                return when (val data = repo.retrieveImageForPaging(params.loadSize, key)) {
                     is Ok -> {
                         data.value.second?.let {
                             keys.add(it)

@@ -20,7 +20,7 @@ import javax.inject.Inject
 interface ImageRepository {
     suspend fun retrieveImageAndUpdate(): Flow<Result<List<MyImage>, String>>
 
-    suspend fun retrieveImageForPaging(after: String?): Result<Pair<List<MyImage>, String?>, String>
+    suspend fun retrieveImageForPaging(loadSize: Int, after: String?): Result<Pair<List<MyImage>, String?>, String>
 }
 
 class DefaultImageRepository @Inject constructor(
@@ -78,9 +78,9 @@ class DefaultImageRepository @Inject constructor(
         }.flowOn(dispatcher)
     }
 
-    override suspend fun retrieveImageForPaging(after: String?):
+    override suspend fun retrieveImageForPaging(loadSize: Int, after: String?):
             Result<Pair<List<MyImage>, String?>, String> {
-        return when(val data = remoteDataSource.getImages(1000, after)) {
+        return when(val data = remoteDataSource.getImages(loadSize, after)) {
             is Ok -> Ok(data.value)
             is Err -> Err(data.error)
         }

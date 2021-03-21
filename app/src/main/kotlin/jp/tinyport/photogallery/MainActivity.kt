@@ -127,8 +127,13 @@ internal class MyViewHolder(val binding: ListItemBinding) :
         RecyclerView.ViewHolder(binding.root)
 
 internal class MyAdapter : RecyclerView.Adapter<MyViewHolder>() {
-    private val list = mutableListOf<MyImage>()
+    private var list = listOf<MyImage>()
     private var updateJob: Job? = null
+    private val useDiffUtil = true
+
+    init {
+        setHasStableIds(true)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
         return MyViewHolder(ListItemBinding.inflate(
@@ -151,10 +156,20 @@ internal class MyAdapter : RecyclerView.Adapter<MyViewHolder>() {
         return list.size
     }
 
+    override fun getItemId(position: Int): Long {
+        return list[position].id.hashCode().toLong()
+    }
+
     fun update(scope: CoroutineScope, newList: List<MyImage>) {
+        if (!useDiffUtil) {
+            list = newList
+            notifyDataSetChanged()
+            return
+        }
+
         val currentList = ArrayList(list)
 
-        updateJob?.cancelChildren()
+        updateJob?.cancel()
 
         updateJob = scope.launch(Dispatchers.Default) {
             val diff = DiffUtil.calculateDiff(object : DiffUtil.Callback() {
@@ -181,8 +196,7 @@ internal class MyAdapter : RecyclerView.Adapter<MyViewHolder>() {
                 updateJob = null
                 currentCoroutineContext().ensureActive()
 
-                list.clear()
-                list.addAll(newList)
+                list = newList
                 diff.dispatchUpdatesTo(this@MyAdapter)
             }
         }

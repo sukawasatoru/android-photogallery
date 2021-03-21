@@ -298,7 +298,7 @@ internal class MyAdapter : RecyclerView.Adapter<MyViewHolder>() {
 
 @HiltViewModel
 internal class HugeVm @Inject constructor(repo: ImageRepository) : ViewModel() {
-    val pagerFlow = Pager(PagingConfig(pageSize = 1)) {
+    val pagerFlow = Pager(PagingConfig(pageSize = 1, maxSize = 3)) {
         object : PagingSource<String, MyImage>() {
             override suspend fun load(params: LoadParams<String>): LoadResult<String, MyImage> {
                 return when (val data = repo.retrieveImageForPaging(params.key)) {

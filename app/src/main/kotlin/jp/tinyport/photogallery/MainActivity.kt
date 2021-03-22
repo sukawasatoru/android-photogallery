@@ -16,6 +16,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.github.michaelbull.result.Err
@@ -61,6 +62,11 @@ class MainActivity : AppCompatActivity() {
 
         binding = MainActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.list.addItemDecoration(
+                DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
+        binding.list.addItemDecoration(
+                DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL))
 
         usePagingV3()
     }

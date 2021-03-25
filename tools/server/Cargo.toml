@@ -11,6 +11,7 @@ dotenv = "=0.15.0"
 futures = "=0.3.13"
 juniper_hyper = "=0.6.3"
 lipsum = "=0.7.0"
+num-traits = "=0.2.14"
 serde_json = "=1.0.64"
 
 # for pasteboard v0.1.1.
@@ -36,7 +37,7 @@ default-features = false
 
 [dependencies.juniper]
 version = "=0.15.3"
-features = ["url"]
+features = ["chrono", "url"]
 
 [dependencies.tokio]
 # v0.2 for hyper v0.13.

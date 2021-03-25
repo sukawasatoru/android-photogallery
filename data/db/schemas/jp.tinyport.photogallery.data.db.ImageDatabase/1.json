@@ -2,15 +2,21 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "9438a5ced98e1780d11743ddbe5a2e80",
+    "identityHash": "4b12f2da3c51b9ca582cec483a711cf0",
     "entities": [
       {
         "tableName": "image",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `url` TEXT NOT NULL, `description` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `createdDate` TEXT NOT NULL, `url` TEXT NOT NULL, `description` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdDate",
+            "columnName": "createdDate",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -33,14 +39,23 @@
           ],
           "autoGenerate": false
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_image_createdDate",
+            "unique": false,
+            "columnNames": [
+              "createdDate"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_image_createdDate` ON `${TABLE_NAME}` (`createdDate`)"
+          }
+        ],
         "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9438a5ced98e1780d11743ddbe5a2e80')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4b12f2da3c51b9ca582cec483a711cf0')"
     ]
   }
 }

@@ -1928,6 +1928,7 @@ dependencies = [
  "juniper",
  "juniper_hyper",
  "lipsum",
+ "num-traits",
  "pasteboard",
  "serde_json",
  "silicon",

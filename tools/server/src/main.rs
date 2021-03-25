@@ -1,6 +1,9 @@
+use anyhow::Context as AnyhowContext;
 use anyhow::Result as Fallible;
+use chrono::{DateTime, TimeZone, Utc};
 use hyper::Method;
 use juniper::{graphql_object, graphql_value, FieldError, FieldResult};
+use num_traits::ToPrimitive;
 use std::convert::TryInto;
 use std::sync::Arc;
 use structopt::StructOpt;
@@ -176,6 +179,14 @@ struct Image {
 impl Image {
     fn id(&self) -> String {
         format!("tentative-id-{}", self.id)
+    }
+
+    fn created_date(&self) -> FieldResult<DateTime<Utc>> {
+        Ok(Utc.timestamp(
+            DateTime::parse_from_rfc3339("2021-03-24T23:40:00Z")?.timestamp()
+                + self.id.to_i64().context("to_i64")?,
+            0,
+        ))
     }
 
     fn url(&self, context: &Context) -> Url {

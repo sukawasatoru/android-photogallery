@@ -35,8 +35,10 @@ object RepositoryModule {
     }
 
     @Provides
-    fun provideImageLocalDataSource(db: ImageDatabase): ImageLocalDataSource {
-        return ImageLocalDataSourceImpl(db)
+    fun provideImageLocalDataSource(
+            @ApplicationContext context: Context,
+            db: ImageDatabase): ImageLocalDataSource {
+        return ImageLocalDataSourceImpl(context, db)
     }
 
     @ExperimentalCoroutinesApi

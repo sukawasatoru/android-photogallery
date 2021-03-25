@@ -1,5 +1,6 @@
 package jp.tinyport.photogallery.data.db.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
@@ -14,6 +15,9 @@ interface ImageDao {
     // TODO: sort
     @Query("select * from image")
     fun findAll(): List<ImageEntity>
+
+    @Query("SELECT * FROM image ORDER BY createdDate")
+    fun pagingSource(): PagingSource<Int, ImageEntity>
 
     @Insert
     fun saveImages(entities: List<ImageEntity>)

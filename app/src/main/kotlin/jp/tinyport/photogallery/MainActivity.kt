@@ -52,6 +52,7 @@ class MainActivity : AppCompatActivity() {
 
     private val vm: MyVm by viewModels()
     private val hugeVm: HugeVm by viewModels()
+    private val remoteMediatorVm: RemoteMediatorVm by viewModels()
 
     private lateinit var binding: MainActivityBinding
 
@@ -68,7 +69,9 @@ class MainActivity : AppCompatActivity() {
         binding.list.addItemDecoration(
                 DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL))
 
-        usePagingV3()
+//        useMyAdapter()
+//        usePagingV3()
+        usePagingRemoteMediator()
     }
 
     override fun onDestroy() {
@@ -89,10 +92,21 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
     }
 
-    override fun onRestart() {
-        log.info("[MainActivity] onRestart")
+    override fun onTrimMemory(level: Int) {
+        val levelString = when (level) {
+            TRIM_MEMORY_COMPLETE -> "TRIM_MEMORY_COMPLETE"
+            TRIM_MEMORY_MODERATE -> "TRIM_MEMORY_MODERATE"
+            TRIM_MEMORY_BACKGROUND -> "TRIM_MEMORY_BACKGROUND"
+            TRIM_MEMORY_UI_HIDDEN -> "TRIM_MEMORY_UI_HIDDEN"
+            TRIM_MEMORY_RUNNING_CRITICAL -> "TRIM_MEMORY_RUNNING_CRITICAL"
+            TRIM_MEMORY_RUNNING_LOW -> "TRIM_MEMORY_RUNNING_LOW"
+            TRIM_MEMORY_RUNNING_MODERATE -> "TRIM_MEMORY_RUNNING_MODERATE"
+            else -> throw RuntimeException("unreachable")
+        }
 
-        super.onRestart()
+        log.info("[MainActivity] onTrimMemory: %s", levelString)
+
+        super.onTrimMemory(level)
     }
 
     /**
@@ -142,6 +156,44 @@ class MainActivity : AppCompatActivity() {
      * Paging ver.
      */
     private fun usePagingV3() {
+        val adapter = createMyImageAdapter()
+        binding.list.adapter = adapter
+
+        lifecycleScope.launch {
+            hugeVm.pagerFlow.collectLatest { adapter.submitData(it) }
+        }
+
+        lifecycleScope.launch {
+            adapter.loadStateFlow
+                    .collectLatest {
+                        log.info("[MainActivity] loadStateFlow: %s", it)
+                    }
+        }
+
+        // TODO: https://developer.android.com/topic/libraries/architecture/paging/v3-paged-data?hl=ja#load-state-adapter
+        // adapter.withLoadStateHeader()
+    }
+
+    private fun usePagingRemoteMediator() {
+        val adapter = createMyImageAdapter()
+        binding.list.adapter = adapter
+
+        lifecycleScope.launch {
+            remoteMediatorVm.pagerFlow.collectLatest { adapter.submitData(it) }
+        }
+
+        lifecycleScope.launch {
+            adapter.loadStateFlow
+                    .collectLatest {
+                        log.info("[MainActivity] loadStateFlow: %s", it)
+                    }
+        }
+
+        // TODO: https://developer.android.com/topic/libraries/architecture/paging/v3-paged-data?hl=ja#load-state-adapter
+        // adapter.withLoadStateHeader()
+    }
+
+    private fun createMyImageAdapter(): PagingDataAdapter<MyImage, MyViewHolder> {
         val diffCallback = object : DiffUtil.ItemCallback<MyImage>() {
             override fun areItemsTheSame(oldItem: MyImage, newItem: MyImage): Boolean {
                 return oldItem.id == newItem.id
@@ -152,7 +204,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val adapter = object : PagingDataAdapter<MyImage, MyViewHolder>(diffCallback) {
+        return object : PagingDataAdapter<MyImage, MyViewHolder>(diffCallback) {
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
                 return MyViewHolder(ListItemBinding.inflate(
                         LayoutInflater.from(parent.context), parent, false))
@@ -175,39 +227,6 @@ class MainActivity : AppCompatActivity() {
                 Glide.with(holder.binding.image).clear(holder.binding.image)
             }
         }
-
-        binding.list.adapter = adapter
-
-        lifecycleScope.launch {
-            hugeVm.pagerFlow.collectLatest { adapter.submitData(it) }
-        }
-
-        lifecycleScope.launch {
-            adapter.loadStateFlow
-                    .collectLatest {
-                        log.info("[MainActivity] loadStateFlow: %s", it)
-                    }
-        }
-
-        // TODO: https://developer.android.com/topic/libraries/architecture/paging/v3-paged-data?hl=ja#load-state-adapter
-        // adapter.withLoadStateHeader()
-    }
-
-    override fun onTrimMemory(level: Int) {
-        val levelString = when (level) {
-            TRIM_MEMORY_COMPLETE -> "TRIM_MEMORY_COMPLETE"
-            TRIM_MEMORY_MODERATE -> "TRIM_MEMORY_MODERATE"
-            TRIM_MEMORY_BACKGROUND -> "TRIM_MEMORY_BACKGROUND"
-            TRIM_MEMORY_UI_HIDDEN -> "TRIM_MEMORY_UI_HIDDEN"
-            TRIM_MEMORY_RUNNING_CRITICAL -> "TRIM_MEMORY_RUNNING_CRITICAL"
-            TRIM_MEMORY_RUNNING_LOW -> "TRIM_MEMORY_RUNNING_LOW"
-            TRIM_MEMORY_RUNNING_MODERATE -> "TRIM_MEMORY_RUNNING_MODERATE"
-            else -> throw RuntimeException("unreachable")
-        }
-
-        log.info("[MainActivity] onTrimMemory: %s", levelString)
-
-        super.onTrimMemory(level)
     }
 }
 
@@ -364,4 +383,9 @@ internal class HugeVm @Inject constructor(repo: ImageRepository) : ViewModel() {
     }
             .flow
             .cachedIn(viewModelScope)
+}
+
+@HiltViewModel
+internal class RemoteMediatorVm @Inject constructor(repo: ImageRepository) : ViewModel() {
+    val pagerFlow = repo.imageStream().cachedIn(viewModelScope)
 }

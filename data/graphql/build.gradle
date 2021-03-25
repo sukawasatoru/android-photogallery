@@ -13,6 +13,7 @@ android {
 
 apollo {
     customTypeMapping = [
+        'DateTimeUtc' : 'java.time.LocalDateTime',
         'Url': 'kotlin.String',
     ]
     generateKotlinModels.set true

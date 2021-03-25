@@ -25,7 +25,11 @@ android {
 
 dependencies {
     implementation project(':model')
-    implementation Depends.kotlinResult
+    implementation Depends.androidx.pagingRuntime
     implementation Depends.androidx.roomKtx
+    implementation Depends.google.hilt
+    implementation Depends.kotlinResult
+    implementation Depends.tinyport.logger
     kapt Depends.androidx.roomCompiler
+    kapt Depends.google.hiltCompiler
 }

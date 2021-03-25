@@ -16,6 +16,7 @@ android {
 
 dependencies {
     implementation project(':model')
+    implementation Depends.androidx.pagingRuntime
     implementation Depends.androidx.roomKtx
     implementation Depends.google.hilt
     implementation Depends.kotlinResult

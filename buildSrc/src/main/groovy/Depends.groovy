@@ -29,7 +29,7 @@ class Depends {
         final navigationUi = "androidx.navigation:navigation-ui-ktx:$navigationVersion"
         final pagingRuntime = 'androidx.paging:paging-runtime-ktx:3.0.0-beta02'
         final recyclerView = "androidx.recyclerview:recyclerview:1.1.0"
-        final roomVersion = '2.2.6'
+        final roomVersion = '2.3.0-rc01'
         final roomCompiler = "androidx.room:room-compiler:$roomVersion"
         final roomKtx = "androidx.room:room-ktx:$roomVersion"
         final roomRuntime = "androidx.room:room-runtime:$roomVersion"

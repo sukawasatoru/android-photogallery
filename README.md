@@ -27,7 +27,7 @@ Remote から写真を一定数取得し View に反映させます。
 
 Remote から写真を一定数取得し View に反映させます。
 
-実装は [MyActivity.usePagingV3](#myactivityusepagingv3) の実装に加え RemoteMediator を使用しています。 　
+実装は [MyActivity.usePagingV3](#myactivityusepagingv3) の実装に加え RemoteMediator を使用しています。  
 よって Room で既存のデータを View に表示したのちに Remote から最新のデータを取得します。
 
 5000件を Memory 上に持ち、 5000件以上取得した場合表示している箇所から離れている方向のデータを Drop します。一度 Remote から取得したデータは Room に記憶されているためそちらを使用します。

@@ -16,6 +16,7 @@ import jp.tinyport.photogallery.model.MyImage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 interface ImageServerDataSource {
@@ -26,13 +27,12 @@ interface ImageServerDataSource {
 class ImageServerDataSourceImpl(apiEndpoint: String) : ImageServerDataSource {
     private val apolloClient = ApolloClient.builder()
             .serverUrl(apiEndpoint)
-            .addCustomTypeAdapter(CustomType.DATETIMEUTC, object : CustomTypeAdapter<LocalDateTime> {
-                override fun decode(value: CustomTypeValue<*>): LocalDateTime {
-
-                    return LocalDateTime.parse(value.value.toString(), DateTimeFormatter.ISO_DATE_TIME)
+            .addCustomTypeAdapter(CustomType.DATETIMEUTC, object : CustomTypeAdapter<ZonedDateTime> {
+                override fun decode(value: CustomTypeValue<*>): ZonedDateTime {
+                    return ZonedDateTime.parse(value.value.toString(), DateTimeFormatter.ISO_DATE_TIME)
                 }
 
-                override fun encode(value: LocalDateTime): CustomTypeValue<*> {
+                override fun encode(value: ZonedDateTime): CustomTypeValue<*> {
                     return CustomTypeValue.GraphQLString(value.format(DateTimeFormatter.ISO_DATE_TIME))
                 }
             })

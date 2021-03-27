@@ -1,12 +1,12 @@
 package jp.tinyport.photogallery.model
 
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 interface MyImage {
     companion object {
         fun new(
                 id: String,
-                createdDate: LocalDateTime,
+                createdDate: ZonedDateTime,
                 url: String,
                 description: String,
         ): MyImage = MyImageImpl(
@@ -29,14 +29,14 @@ interface MyImage {
     }
 
     val id: String
-    val createdDate: LocalDateTime
+    val createdDate: ZonedDateTime
     val url: String
     val description: String
 }
 
 data class MyImageImpl(
         override val id: String,
-        override val createdDate: LocalDateTime,
+        override val createdDate: ZonedDateTime,
         override val url: String,
         override val description: String,
 ) : MyImage {

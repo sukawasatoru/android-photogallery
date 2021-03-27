@@ -1,3 +1,5 @@
+import java.time.ZonedDateTime
+
 plugins {
     id 'com.android.library'
     id 'com.apollographql.apollo'
@@ -13,7 +15,7 @@ android {
 
 apollo {
     customTypeMapping = [
-        'DateTimeUtc' : 'java.time.LocalDateTime',
+        'DateTimeUtc' : ZonedDateTime.name,
         'Url': 'kotlin.String',
     ]
     generateKotlinModels.set true

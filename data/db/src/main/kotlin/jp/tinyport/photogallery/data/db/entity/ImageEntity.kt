@@ -4,14 +4,14 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import jp.tinyport.photogallery.model.MyImage
-import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 @Entity(tableName = "image")
 data class ImageEntity(
         @PrimaryKey
         override val id: String,
         @ColumnInfo(index = true)
-        override val createdDate: LocalDateTime,
+        override val createdDate: ZonedDateTime,
         override val url: String,
         override val description: String,
 ) : MyImage {

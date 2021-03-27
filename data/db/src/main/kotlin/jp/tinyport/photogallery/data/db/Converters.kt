@@ -1,17 +1,18 @@
 package jp.tinyport.photogallery.data.db
 
 import androidx.room.TypeConverter
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 class Converters {
     @TypeConverter
-    fun fromLocalDateTime(value: LocalDateTime): String {
-        return value.format(DateTimeFormatter.ISO_DATE_TIME)
+    fun fromZonedDateTime(value: ZonedDateTime): Long {
+        return value.toInstant().toEpochMilli()
     }
 
     @TypeConverter
-    fun intoLocalDateTime(value: String): LocalDateTime {
-        return LocalDateTime.parse(value, DateTimeFormatter.ISO_DATE_TIME)
+    fun intoZonedDateTime(value: Long): ZonedDateTime {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.of("UTC"))
     }
 }

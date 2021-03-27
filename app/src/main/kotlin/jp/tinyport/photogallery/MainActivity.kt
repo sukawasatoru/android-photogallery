@@ -200,7 +200,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun areContentsTheSame(oldItem: MyImage, newItem: MyImage): Boolean {
-                return oldItem == newItem
+                return MyImage.equals(oldItem, newItem)
             }
         }
 

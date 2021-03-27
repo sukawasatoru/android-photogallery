@@ -15,6 +15,17 @@ interface MyImage {
                 url,
                 description,
         )
+
+        fun equals(lhs: MyImage, rhs: MyImage): Boolean {
+            if (lhs === rhs) {
+                return true
+            }
+
+            return lhs.id == rhs.id &&
+                    lhs.createdDate == rhs.createdDate &&
+                    lhs.url == rhs.url &&
+                    lhs.description == rhs.description
+        }
     }
 
     val id: String

@@ -71,7 +71,7 @@ class ImageServerDataSourceImpl(apiEndpoint: String) : ImageServerDataSource {
 }
 
 private fun MyImage.Companion.from(entity: ImageMetaQuery.Node): MyImage {
-    return MyImage(
+    return new(
             id = entity.id,
             createdDate = entity.createdDate,
             url = entity.url,

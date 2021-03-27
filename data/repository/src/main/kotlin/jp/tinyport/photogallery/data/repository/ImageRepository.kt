@@ -8,15 +8,12 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.paging.map
 import com.github.michaelbull.result.Err
 import com.github.michaelbull.result.Ok
 import com.github.michaelbull.result.Result
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.qualifiers.ApplicationContext
 import jp.tinyport.photogallery.data.db.ImageLocalDataSource
-import jp.tinyport.photogallery.data.db.entity.ImageEntity
-import jp.tinyport.photogallery.data.db.from
 import jp.tinyport.photogallery.data.graphql.ImageServerDataSource
 import jp.tinyport.photogallery.data.repository.di.RepositoryDispatcher
 import jp.tinyport.photogallery.data.repository.di.RepositoryEntryPoint
@@ -25,7 +22,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 interface ImageRepository {
@@ -106,12 +102,12 @@ class DefaultImageRepository @Inject constructor(
                         pageSize = 1000,
                         maxSize = 5000,
                 ),
-                remoteMediator = object : RemoteMediator<Int, ImageEntity>() {
+                remoteMediator = object : RemoteMediator<Int, MyImage>() {
                     val nextKeys = mutableSetOf<String>()
 
                     override suspend fun load(
                             loadType: LoadType,
-                            state: PagingState<Int, ImageEntity>): MediatorResult {
+                            state: PagingState<Int, MyImage>): MediatorResult {
                         val after = when (loadType) {
                             LoadType.REFRESH -> {
                                 log.info("[ImageRepository] loadType: %s, pageSize: %s",
@@ -153,11 +149,6 @@ class DefaultImageRepository @Inject constructor(
                 pagingSourceFactory = { localDataSource.pagingSource() }
         )
                 .flow
-                .map {
-                    it.map { data ->
-                        MyImage.from(data)
-                    }
-                }
                 .flowOn(dispatcher)
     }
 }

@@ -3,15 +3,17 @@ package jp.tinyport.photogallery.data.db.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import jp.tinyport.photogallery.model.MyImage
+import java.time.LocalDateTime
 
 @Entity(tableName = "image")
 data class ImageEntity(
         @PrimaryKey
-        val id: String,
+        override val id: String,
         @ColumnInfo(index = true)
-        val createdDate: String,
-        val url: String,
-        val description: String,
-) {
-        companion object
+        override val createdDate: LocalDateTime,
+        override val url: String,
+        override val description: String,
+) : MyImage {
+    companion object
 }

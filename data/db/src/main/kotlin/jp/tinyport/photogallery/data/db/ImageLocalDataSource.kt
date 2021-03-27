@@ -9,8 +9,6 @@ import dagger.hilt.android.EntryPointAccessors
 import jp.tinyport.photogallery.data.db.dao.di.DbEntryPoint
 import jp.tinyport.photogallery.data.db.entity.ImageEntity
 import jp.tinyport.photogallery.model.MyImage
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 interface ImageLocalDataSource {
     suspend fun getImages(): Result<List<MyImage>, String>
@@ -19,7 +17,7 @@ interface ImageLocalDataSource {
 
     suspend fun saveImages(images: List<MyImage>): Result<Unit, String>
 
-    fun pagingSource(): PagingSource<Int, ImageEntity>
+    fun pagingSource(): PagingSource<Int, MyImage>
 }
 
 class ImageLocalDataSourceImpl(
@@ -60,29 +58,29 @@ class ImageLocalDataSourceImpl(
         }
     }
 
-    override fun pagingSource(): PagingSource<Int, ImageEntity> {
+    override fun pagingSource(): PagingSource<Int, MyImage> {
         log.debug("[ImageLocalDataSource] pagingSource")
 
         // automatically generated PagingSource uses LimitOffsetDataSource.java.
         // it generates `SELECT * FROM ( " + mSourceQuery.getSql() + " ) LIMIT ? OFFSET ?`
         // so need to create the index for avoiding the table scan.
-        return db.imageDao().pagingSource()
+        return db.imageDao().pagingSource() as PagingSource<Int, MyImage>
     }
 }
 
-fun MyImage.Companion.from(entity: ImageEntity): MyImage {
-    return MyImage(
+private fun MyImage.Companion.from(entity: ImageEntity): MyImage {
+    return MyImage.new(
             id = entity.id,
-            createdDate = LocalDateTime.parse(entity.createdDate, DateTimeFormatter.ISO_DATE_TIME),
+            createdDate = entity.createdDate,
             url = entity.url,
             description = entity.description,
     )
 }
 
-fun MyImage.toEntity(): ImageEntity {
+private fun MyImage.toEntity(): ImageEntity {
     return ImageEntity(
             id = id,
-            createdDate = createdDate.format(DateTimeFormatter.ISO_DATE_TIME),
+            createdDate = createdDate,
             url = url,
             description = description,
     )

@@ -28,7 +28,7 @@ features = ["serde"]
 
 [dependencies.hyper]
 # v0.13.x for junper_hyper.
-version = "=0.13.10"
+version = "=0.14.10"
 
 [dependencies.image]
 version = "=0.23.14"
